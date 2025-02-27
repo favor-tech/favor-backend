@@ -1,1 +1,4 @@
+__pycache__/
 *.pyc
+*.pyo
+favor_backend/__pycache__/
