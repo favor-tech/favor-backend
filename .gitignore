@@ -2,5 +2,14 @@ __pycache__/
 *.pyc
 *.pyo
 db.sqlite3
-staticfiles/
+static/
+venv/
+.ebignore
+Procfile
+.ebextensions/
+.env
 
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
