@@ -8,7 +8,7 @@ class Artist(BaseModel):
     about = models.TextField()
     user = models.ForeignKey("User",on_delete=models.CASCADE,related_name="artist_profile")
     is_registered = models.BooleanField()
-    registered_at = DateTimeField(null=True, blank=True)
+    registered_at = DateTimeField(null=True, blank=True,auto_now=True,editable=False)
     x_url = models.URLField(null=True, blank=True)
     instagram_url = models.URLField(null=True, blank=True)
     linkedin_url = models.URLField(null=True, blank=True)

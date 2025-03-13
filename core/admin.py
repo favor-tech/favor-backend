@@ -1,6 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import *
+from django.contrib import admin
+from django import forms
+
+
+class EventModelAdminForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = '__all__'
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class EventModelAdmin(admin.ModelAdmin):
+    form = EventModelAdminForm
+
+
+
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -15,13 +33,11 @@ class CustomUserAdmin(UserAdmin):
         ("Important dates", {"fields": ("last_login",)}),
     )
 
+models = [Role,Permission,RolePermission,Gallery,GalleryArtist,GalleryUser,EventArtist,
+          EventCategory,Artist,Location,Category,UserLocation,UserRole,UserStatus,
+          ArtistVerification,ArtistStatus]
+
+for model in models:
+    admin.site.register(model)
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Role)
-admin.site.register(Permission)
-admin.site.register(RolePermission)
-admin.site.register(Event)
-admin.site.register(Gallery)
-admin.site.register(Artist)
-admin.site.register(Location)
-admin.site.register(UserLocation)
-admin.site.register(UserRole)
+admin.site.register(Event, EventModelAdmin)

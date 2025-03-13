@@ -8,8 +8,8 @@ class ArtistVerification(BaseModel):
     status = models.ForeignKey("UserStatus", on_delete=models.CASCADE)
     approved_by = models.ForeignKey("User", on_delete=models.CASCADE, null=True, blank=True, related_name="approved_verifications")
     rejection_reason = models.TextField(null=True, blank=True)
-    requested_at = DateTimeField()
-    approved_at = DateTimeField(null=True, blank=True)
+    requested_at = DateTimeField(editable=False)
+    approved_at = DateTimeField(auto_now=True,editable=False)
 
     class Meta:
         db_table = "artist_verification"

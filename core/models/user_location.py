@@ -5,7 +5,7 @@ from .definitions.DateTimeWithoutTZ import DateTimeWithoutTZField as DateTimeFie
 class UserLocation(BaseModel):
     user = models.ForeignKey("User", on_delete=models.CASCADE)
     location = models.ForeignKey("Location", on_delete=models.CASCADE)
-    detected_at = DateTimeField()
+    detected_at = DateTimeField(editable=False)
     is_active = models.BooleanField()
 
     class Meta:

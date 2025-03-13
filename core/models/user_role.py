@@ -6,7 +6,7 @@ class UserRole(BaseModel):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="roles", db_index=True)
     role = models.ForeignKey("Role", on_delete=models.CASCADE, db_index=True)
     assigned_by = models.ForeignKey("User", on_delete=models.CASCADE, related_name="assigned_roles", db_index=True)
-    assigned_at = DateTimeField()
+    assigned_at = DateTimeField(auto_now=True,editable=False)
 
     class Meta:
         db_table = "user_role"

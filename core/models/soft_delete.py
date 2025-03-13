@@ -6,8 +6,8 @@ from .definitions.DateTimeWithoutTZ import DateTimeWithoutTZField as DateTimeFie
 class SoftDeleteModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = DateTimeField(editable=False, default=timezone.now)
-    updated_at = DateTimeField(null=True)
-    deleted_at = DateTimeField(null=True, blank=True)
+    updated_at = DateTimeField(null=True,auto_now=True)
+    deleted_at = DateTimeField(null=True,blank=True,editable=False)
 
     def delete(self, *args, **kwargs):
         self.deleted_at = timezone.now()
