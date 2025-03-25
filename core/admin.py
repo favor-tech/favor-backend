@@ -18,7 +18,9 @@ class EventModelAdmin(admin.ModelAdmin):
     form = EventModelAdminForm
 
 
-
+class LocationAdmin(admin.ModelAdmin):
+    search_fields = ["city", "province", "district", "region","latitude","longitude", "country", "timezone"]
+    list_display = ["city", "province", "district", "region", "latitude","longitude", "country", "timezone"]
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -28,16 +30,17 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
-        ("Personal Info", {"fields": ("name", "surname", "about", "phone", "profile_picture_url", "instagram_url", "web_url", "x_url")}),
+        ("Personal Info", {"fields": ("name", "surname", "about", "artist","phone", "profile_picture_url", "instagram_url", "web_url", "x_url")}),
         ("Roles & Permissions", {"fields": ("is_staff", "is_active", "is_superuser")}),
-        ("Important dates", {"fields": ("last_login",)}),
+        #("Important dates", {"fields": ("last_login",)}),
     )
 
 models = [Role,Permission,RolePermission,Gallery,GalleryArtist,GalleryUser,EventArtist,
-          EventCategory,Artist,Location,Category,UserLocation,UserRole,UserStatus,
+          EventCategory,Artist,Category,UserLocation,UserRole,UserStatus,
           ArtistVerification,ArtistStatus]
 
 for model in models:
     admin.site.register(model)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Event, EventModelAdmin)
+admin.site.register(Location,LocationAdmin)

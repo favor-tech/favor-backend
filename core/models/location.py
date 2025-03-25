@@ -10,6 +10,10 @@ class Location(BaseModel):
     district = models.CharField(max_length=255, null=True, blank=True)
     region = models.CharField(max_length=255, null=True, blank=True)
     timezone = models.CharField(max_length=255, null=True, blank=True)
+    
+    def __str__(self):
+        obj_name = str(self.province) + ((" / " + str(self.district)) if self.district else "")
+        return obj_name
 
 
     class Meta:
