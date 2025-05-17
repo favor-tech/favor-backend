@@ -9,12 +9,16 @@ from .bookmark import *
 from .category import *
 from .event_artist import *
 from .event_category import *
+from .exhibition_types import *
 from .event import *
+from .event_images import *
+from .event_types import *
 from .following_artist import *
 from .following_gallery import *
 from .gallery_artist import *
 from .gallery_user import *
 from .gallery import *
+from .gallery_images import *
 from .general_notification import *
 from .location import *
 from .notification import *
