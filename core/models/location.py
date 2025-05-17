@@ -1,5 +1,6 @@
 from .base import BaseModel
 from django.db import models
+from rest_framework import serializers
 
 class Location(BaseModel):
     latitude = models.FloatField(db_index=True)
@@ -18,3 +19,11 @@ class Location(BaseModel):
 
     class Meta:
         db_table = "location"
+
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Location
+        fields=["id","city","province","district","latitude","longitude"]
+
