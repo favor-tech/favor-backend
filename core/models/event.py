@@ -1,8 +1,8 @@
+import os
 from .soft_delete import SoftDeleteModel
 from django.db import models
 from .definitions.DateTimeWithoutTZ import DateTimeWithoutTZField as DateTimeField
 from rest_framework import serializers
-import os
 from django.utils.text import slugify
 
 
