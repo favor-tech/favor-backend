@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-qzp+r#hc&kxo05034%7f0zd%kq(*)tccsz2y%y^kkl*r7ct^r$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
+#DEBUG = True
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true' 
 
 ALLOWED_HOSTS = ['*']
@@ -146,8 +148,9 @@ USE_TZ = True
 
 if DEBUG:
     STATIC_URL = "/static/"
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+    #STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 else:
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
