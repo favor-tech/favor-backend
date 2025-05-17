@@ -75,3 +75,4 @@ zipp==1.0.0
 boto3
 django-storages
 python-dotenv
+python-jose[cryptography]
