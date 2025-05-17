@@ -3,44 +3,83 @@ from django.contrib.auth.admin import UserAdmin
 from .models import *
 from django.contrib import admin
 from django import forms
+from datetime import datetime , time
 
+
+class EventArtistInline(admin.TabularInline):
+    model = EventArtist
+    extra = 1
+
+class EventCategoryInline(admin.TabularInline):
+    model = EventCategory
+    extra = 1
+
+class EventImagesInline(admin.TabularInline):
+    model = EventImages
+    extra = 1
 
 class EventModelAdminForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = '__all__'
-        widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
-        }
+
+        # widgets = {
+        #    'start_date': forms.DateInput(attrs={'type': 'date'}),
+        #    'end_date': forms.DateInput(attrs={'type': 'date'}),
+        # }
 
 class EventModelAdmin(admin.ModelAdmin):
     form = EventModelAdminForm
+    inlines = [EventArtistInline,EventCategoryInline,EventImagesInline]
+
+    search_fields = ["title","start_date","end_date"]
+    list_display = ["title","gallery","location","start_date","end_date"]
+
+class GalleryImagesInline(admin.TabularInline):
+    model = GalleryImages
+    extra = 1
+
+class GalleryAdmin(admin.ModelAdmin):
+    inlines = [GalleryImagesInline]
+    search_fields = ["name","address"]
+    list_display = ["name","address","location"]
 
 
 class LocationAdmin(admin.ModelAdmin):
     search_fields = ["city", "province", "district", "region","latitude","longitude", "country", "timezone"]
     list_display = ["city", "province", "district", "region", "latitude","longitude", "country", "timezone"]
 
+class UserRoleInline(admin.TabularInline):
+    model = UserRole
+    extra = 1
+    fk_name = "user"
+
 class CustomUserAdmin(UserAdmin):
     model = User
+    inlines = [UserRoleInline]
     list_display = ("username", "email", "name", "surname", "is_staff", "is_active")
     search_fields = ("username", "email", "name", "surname")
     ordering = ("username",)
 
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
-        ("Personal Info", {"fields": ("name", "surname", "about", "artist","phone", "profile_picture_url", "instagram_url", "web_url", "x_url")}),
+        ("Personal Info", {"fields": ("name", "surname", "about", "artist","phone", "profile_picture", "instagram_url", "web_url", "x_url")}),
         ("Roles & Permissions", {"fields": ("is_staff", "is_active", "is_superuser")}),
         #("Important dates", {"fields": ("last_login",)}),
     )
 
-models = [Role,Permission,RolePermission,Gallery,GalleryArtist,GalleryUser,EventArtist,
-          EventCategory,Artist,Category,UserLocation,UserRole,UserStatus,
+models = [Role,Permission,RolePermission,GalleryArtist,GalleryUser,Artist,Category,UserLocation,UserRole,UserStatus,
           ArtistVerification,ArtistStatus]
+
+
+class BookmarkAdmin(admin.ModelAdmin):
+    search_fields = ["bookmarked_at"]
+    list_display = ["user","event","bookmarked_at"]
 
 for model in models:
     admin.site.register(model)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Event, EventModelAdmin)
 admin.site.register(Location,LocationAdmin)
+admin.site.register(Gallery,GalleryAdmin)
+admin.site.register(Bookmark,BookmarkAdmin)
