@@ -1,6 +1,9 @@
 from django.urls import path
-from .views import home_view
+from core import views
 
 urlpatterns = [
-    path('', home_view, name='home'),
+    path('gallery',views.GalleryView.as_view()),
+    path('events/',views.EventsView.as_view()),
+    path('eventdetail/',views.EventDetailView.as_view()),
+    path('bookmark',views.BookmarkView.as_view()),
 ]
