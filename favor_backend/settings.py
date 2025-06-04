@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 from storages.backends.s3boto3 import S3Boto3Storage
 from dotenv import load_dotenv
+from datetime import timedelta
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,16 +24,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qzp+r#hc&kxo05034%7f0zd%kq(*)tccsz2y%y^kkl*r7ct^r$'
-
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+GUEST_TOKEN = os.getenv('GUEST_TOKEN')
 # SECURITY WARNING: don't run with debug turned on in production!
 
-#DEBUG = True
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true' 
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 AUTH_USER_MODEL = 'core.User'
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "TOKEN_BLACKLIST_ENABLED": True,
+
+}
 
 # Application definition
 
@@ -45,6 +55,9 @@ INSTALLED_APPS = [
     'core',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'dal',
+    'dal_select2',
 ]
 
 
