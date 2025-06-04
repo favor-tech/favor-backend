@@ -18,6 +18,7 @@ from .following_gallery import *
 from .gallery_artist import *
 from .gallery_user import *
 from .gallery import *
+from .gallery_location import *
 from .gallery_images import *
 from .general_notification import *
 from .location import *
