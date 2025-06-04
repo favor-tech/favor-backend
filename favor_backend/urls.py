@@ -16,18 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 from core.views.auth import SSOLoginView
-
+from core.views.location_filter import GalleryLocationAutocomplete
+from core.views.auth import SignupView, CustomTokenObtainPairView , RefreshTokenView , LogoutView , ChangePasswordView , DeleteAccountView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')), 
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("auth/sso-login/", SSOLoginView.as_view(), name="social-login"),
+    path("auth/signup/", SignupView.as_view(), name="signup"),
+    path("auth/login/", CustomTokenObtainPairView.as_view(), name="custom-login"),
+    path("auth/token/refresh/", RefreshTokenView.as_view(), name="custom-token-refresh"),
+    path("auth/logout/", LogoutView.as_view(), name="custom-logout"),
+    path("auth/change-password/", ChangePasswordView.as_view(), name="custom-change-password"),
+    path("auth/delete-account/", DeleteAccountView.as_view(), name="custom-delete-account"),
+    path('gallerylocation-autocomplete/', GalleryLocationAutocomplete.as_view(), name='gallerylocation-autocomplete'),
+
 
 ]
