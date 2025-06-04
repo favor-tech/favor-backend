@@ -7,7 +7,6 @@ from django.utils.text import slugify
 
 
 
-
 def event_thumbnail_upload_path(instance, filename):
     title = slugify(instance.title)
     ext = filename.split('.')[-1]
@@ -17,7 +16,7 @@ def event_thumbnail_upload_path(instance, filename):
 class Event(SoftDeleteModel):
     title = models.CharField(max_length=255,db_index=True)
     gallery = models.ForeignKey("Gallery",on_delete=models.CASCADE,blank=True,null=True)
-    location = models.ForeignKey("Location",on_delete=models.CASCADE,blank=True,null=True)
+    gallery_location = models.ForeignKey("GalleryLocation",on_delete=models.SET_NULL,blank=True,null=True,related_name="galleryslocation")
     start_date = DateTimeField(db_index=True)
     end_date = DateTimeField(db_index=True)
     summary = models.TextField(null=True, blank=True)
@@ -38,7 +37,9 @@ class Event(SoftDeleteModel):
 
 class EventSerializer(serializers.ModelSerializer):
     thumbnail_image = serializers.ImageField(use_url=True, allow_null=True)
-
+    gallery_name = serializers.CharField(source="gallery.name", read_only=True)
+    gallery_location_address = serializers.CharField(source="gallery_location.address", read_only=True)
+    
     class Meta:
         model=Event
-        fields=["id","title","start_date","end_date","gallery","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active"]
+        fields=["id","title","start_date","end_date","gallery","gallery_name","gallery_location_address","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active"]
