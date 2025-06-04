@@ -7,6 +7,7 @@ from .definitions.DateTimeWithoutTZ import DateTimeWithoutTZField as DateTimeFie
 from .user_role import UserRole
 from .role_permission import RolePermission
 from django.utils.text import slugify
+from rest_framework import serializers
 
 def user_profile_picture_upload_path(instance, filename):
     username = slugify(instance.username)
@@ -35,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, db_index=True,null=True,blank=True)
     surname = models.CharField(max_length=255,blank=True,null=True)
     name = models.CharField(max_length=255,blank=True,null=True)
+    birthdate = models.DateField(null=True, blank=True)
     about = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=50, null=True, blank=True)
     artist = models.ForeignKey("Artist", on_delete=models.SET_NULL, null=True, blank=True,related_name="users")
@@ -69,3 +71,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def has_permission(self, permission_name):
         return permission_name in self.get_permissions()
+class UserSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(use_url=True, allow_null=True)
+
+    class Meta:
+        model=User
+        fields=["id","username","email","name","surname","about","profile_picture"]
+        
