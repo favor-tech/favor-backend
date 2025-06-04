@@ -1,5 +1,6 @@
 import json
 from .base_views import GenericAPIView, Response, IsAuthenticated
+from .auth import IsGuestTokenOrAuthenticated
 from core.models import *
 from django.http import JsonResponse
 from core.utils.mixins import ApiResponseMixin
@@ -7,7 +8,8 @@ from rest_framework import status
 
 
 class EventDetailView(GenericAPIView, ApiResponseMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsGuestTokenOrAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self, request):
         event_id = request.GET.get('event')
@@ -32,8 +34,7 @@ class EventDetailView(GenericAPIView, ApiResponseMixin):
             }
 
             return self.api_response(success=True, message="Success", data=serialized, status_code=status.HTTP_200_OK)
-
         except Event.DoesNotExist:
-            return JsonResponse({'error': 'Event not found.'}, status=404)
+            return self.api_response(success=False, message="Event not found.", status_code=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return self.api_response(success=False, message=str(e), status_code=status.HTTP_400_BAD_REQUEST)
