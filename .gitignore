@@ -8,7 +8,9 @@ venv/
 Procfile
 .ebextensions/
 .env
-
+favor-18123-firebase-adminsdk-dh8yk-c13e3f49bd.json
+firebase_script.py
+media/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
