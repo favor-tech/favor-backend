@@ -1,6 +1,7 @@
 import json
 from .base_views import GenericAPIView, Response, IsAuthenticated
-from core.models import *
+from .auth import IsGuestTokenOrAuthenticated
+from core.models import Event, GalleryLocation ,EventSerializer
 from django.http import JsonResponse
 from core.utils.mixins import ApiResponseMixin
 from rest_framework import status
@@ -9,7 +10,8 @@ from django.utils import timezone
 from datetime import datetime
 
 class EventsView(GenericAPIView, ApiResponseMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsGuestTokenOrAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get(self, request):
         latitude = request.GET.get('latitude')
@@ -31,11 +33,10 @@ class EventsView(GenericAPIView, ApiResponseMixin):
             return JsonResponse({'error': 'Invalid latitude or longitude'}, status=400)
 
         nearby_locations = self.filter_nearby_locations(latitude, longitude)
-        events = Event.objects.filter(location__in=nearby_locations)
+        events = Event.objects.filter(gallery_location__in=nearby_locations)
 
-        if is_free:
+        if is_free is not None:
             events = events.filter(is_free=is_free)
-
 
         start_date = request.GET.get("start")
         end_date = request.GET.get("end")
@@ -62,8 +63,8 @@ class EventsView(GenericAPIView, ApiResponseMixin):
         serialized = EventSerializer(events, many=True).data
         return self.api_response(success=True, message="Success", data=serialized, status_code=status.HTTP_200_OK)
 
-    def filter_nearby_locations(self, latitude, longitude, delta=0.10):
-        return Location.objects.filter(
+    def filter_nearby_locations(self, latitude, longitude, delta=0.2):
+        return GalleryLocation.objects.filter(
             latitude__range=(latitude - delta, latitude + delta),
             longitude__range=(longitude - delta, longitude + delta),
         )
