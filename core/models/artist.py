@@ -29,7 +29,7 @@ class Artist(BaseModel):
     linkedin_url = models.URLField(max_length=500, null=True, blank=True)
     profile_picture = models.ImageField(upload_to=artist_profile_picture_upload_path,null=True,blank=True)
     web_url = models.URLField(max_length=500, null=True, blank=True)
-
+    facebook_url = models.URLField(max_length=500, null=True, blank=True)
     def __str__(self):
         return f"{self.name} {self.surname}"
 
@@ -42,4 +42,4 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Artist
-        fields = ["id", "name", "surname", "about", "profile_picture"]
+        fields = ["id", "name", "surname", "about", "profile_picture","x_url","instagram_url","linkedin_url","web_url","facebook_url"]

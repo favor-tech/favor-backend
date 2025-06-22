@@ -46,8 +46,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     linkedin_url = models.URLField(max_length=500,null=True, blank=True)
     web_url = models.URLField(max_length=500,null=True, blank=True)
     x_url = models.URLField(max_length=500,null=True, blank=True)
+    facebook_url = models.URLField(max_length=500,null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    providers = models.JSONField(default=list, blank=True)
+
     created_at = DateTimeField(editable=False, default=timezone.now)
     updated_at = DateTimeField(auto_now=True, null=True, blank=True)
     deleted_at = DateTimeField(null=True, blank=True)
@@ -76,5 +79,5 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=User
-        fields=["id","username","email","name","surname","about","profile_picture"]
+        fields=["id","username","email","name","surname","about","profile_picture","providers"]
         

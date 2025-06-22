@@ -84,13 +84,13 @@ class UserRoleInline(admin.TabularInline):
 class CustomUserAdmin(UserAdmin):
     model = User
     inlines = [UserRoleInline]
-    list_display = ("username", "email", "name", "surname", "is_staff", "is_active")
+    list_display = ("username", "email", "name", "surname", "is_staff", "is_active","providers")
     search_fields = ("username", "email", "name", "surname")
     ordering = ("username",)
 
     fieldsets = (
         (None, {"fields": ("username", "email", "password")}),
-        ("Personal Info", {"fields": ("name", "surname","birthdate" ,"about", "artist","phone", "profile_picture", "instagram_url", "web_url", "x_url")}),
+        ("Personal Info", {"fields": ("name", "surname","birthdate" ,"about", "artist","phone", "profile_picture", "instagram_url", "web_url", "x_url","facebook_url","linkedin_url")}),
         ("Roles & Permissions", {"fields": ("is_staff", "is_active", "is_superuser")}),
         #("Important dates", {"fields": ("last_login",)}),
     )
