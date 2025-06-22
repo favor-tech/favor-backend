@@ -18,11 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from core.views.auth import SSOLoginView
 from core.views.location_filter import GalleryLocationAutocomplete
-from core.views.auth import SignupView, CustomTokenObtainPairView , RefreshTokenView , LogoutView , ChangePasswordView , DeleteAccountView
+from core.views.auth import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('gallerylocation-autocomplete/', GalleryLocationAutocomplete.as_view(), name='gallerylocation-autocomplete'),
     path('', include('core.urls')), 
+    
+    #AUTH URLS
+    path("auth/email-check/", EmailCheckView.as_view(), name="email-check"),
     path("auth/sso-login/", SSOLoginView.as_view(), name="social-login"),
     path("auth/signup/", SignupView.as_view(), name="signup"),
     path("auth/login/", CustomTokenObtainPairView.as_view(), name="custom-login"),
@@ -30,7 +34,9 @@ urlpatterns = [
     path("auth/logout/", LogoutView.as_view(), name="custom-logout"),
     path("auth/change-password/", ChangePasswordView.as_view(), name="custom-change-password"),
     path("auth/delete-account/", DeleteAccountView.as_view(), name="custom-delete-account"),
-    path('gallerylocation-autocomplete/', GalleryLocationAutocomplete.as_view(), name='gallerylocation-autocomplete'),
-
+    path('auth/password-reset/', PasswordResetRequestView.as_view()),
+    path('auth/password-reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view()),
+    path('reset-password-form/<uidb64>/<token>/', reset_password_form, name='reset-password-form')
+    #path('auth/password-reset/complete/', PasswordResetCompleteView.as_view()), #This will be required if password reset operation is managed from only Mobile UI instead of web-url link.
 
 ]

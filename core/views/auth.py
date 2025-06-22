@@ -6,19 +6,25 @@ import requests
 from jose import jwt
 from django.conf import settings
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from core.models import User
 from rest_framework_simplejwt.tokens import RefreshToken 
-from jose.exceptions import JWTError
-from rest_framework.authentication import BasicAuthentication
 from jwt import PyJWKClient
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from core.utils.mixins import ApiResponseMixin
 from rest_framework import serializers
 from .base_views import IsAuthenticated , BasePermission
-
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode , urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.shortcuts import render
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
 APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
@@ -63,8 +69,12 @@ class SSOLoginView(APIView):
             if created:
                 user.username = email.split("@")[0]
                 user.set_unusable_password()
+                user.providers = [provider]
                 user.save()
-
+            else:
+                if provider not in user.providers:
+                    user.providers.append(provider)
+                    user.save()
             refresh = RefreshToken.for_user(user)
 
             return Response({
@@ -78,32 +88,31 @@ class SSOLoginView(APIView):
         except Exception as e:
             return Response({"error post": str(e)}, status=400)
 
-    def verify_firebase_google_token(self,id_token):
+
+    def verify_firebase_google_token(self, id_token):
         try:
-            project_id = "favor-18123"
-            jwks_url = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
-            jwks = requests.get(jwks_url).json()
-            header = self.decode_header_manually(id_token)
-            key = next((k for k in jwks["keys"] if k["kid"] == header["kid"]), None)
+            jwks_url = GOOGLE_JWKS_URL
+            jwk_client = PyJWKClient(jwks_url)
+            signing_key = jwk_client.get_signing_key_from_jwt(id_token).key
 
-            if not key:
-                raise Exception("Firebase public key not found")
-
-            return jwt.decode(
+            decoded = jwt.decode(
                 id_token,
-                key,
+                signing_key,
                 algorithms=["RS256"],
-                audience=project_id,
-                issuer=f"https://securetoken.google.com/{project_id}",
+                audience=google_audience,
+                issuer="https://accounts.google.com",
+                options={"verify_at_hash": False}
             )
+            return decoded
+
         except Exception as e:
-            print("Firebase Google Token Exception:    " + str(e))
-            return None
+            print("Google Token Exception:", e)
+            raise
+
 
     def verify_apple_token(self, id_token):
         try:
             jwks = requests.get(APPLE_JWKS_URL).json()
-            #unverified_header = jwt.get_unverified_header(token)
             unverified_header = self.decode_header_manually(id_token)
             key = next((k for k in jwks["keys"] if k["kid"] == unverified_header["kid"]), None)
 
@@ -169,8 +178,17 @@ class RefreshTokenView(APIView):
         except Exception as e:
             return Response({"error": f"Invalid refresh token: {str(e)}"}, status=status.HTTP_401_UNAUTHORIZED)
 
+class EmailCheckView(APIView,ApiResponseMixin):
+    def post(self, request):
+        email = request.data.get("email")
 
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        if User.objects.filter(email=email).exists():
+            return self.api_response(success=False, message="Email already exists",data=email, status_code=409)
+        else:
+            return self.api_response(success=True, message="Email is available",data=email, status_code=200)
 
 class SignupView(APIView,ApiResponseMixin):
 
@@ -198,6 +216,8 @@ class SignupView(APIView,ApiResponseMixin):
                 birthdate=birthdate,
                 password=password,
             )
+            user.providers = ["email"]
+            user.save()
         except Exception as e:
             return self.api_response(success=False, message=str(e),data=email, status_code=400)
         else:
@@ -267,3 +287,109 @@ class IsGuestTokenOrAuthenticated(BasePermission):
         if auth_header == guest_token:
             return True
         return request.user and request.user.is_authenticated
+    
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required"}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            
+            reset_link = request.build_absolute_uri(
+                reverse("reset-password-form", kwargs={"uidb64": uid, "token": token})
+            )
+
+            html_content = render_to_string("password_reset_email.html", {
+                "reset_link": reset_link,
+                "user": user,
+            })
+
+            email_obj = EmailMultiAlternatives(
+                subject="Favor | Şifre Sıfırlama Bağlantınız",
+                body=f"Şifrenizi sıfırlamak için bu bağlantıya tıklayın: {reset_link}", 
+                from_email="noreply@joinfavor.com",
+                to=[email],
+            )
+            email_obj.attach_alternative(html_content, "text/html")
+            email_obj.send()
+
+            return Response({"message": "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi."}, status=200)
+
+        except User.DoesNotExist:
+            return Response({"error": "Bu e-posta adresi ile kayıtlı bir kullanıcı bulunamadı."}, status=404)
+        
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+            if default_token_generator.check_token(user, token):
+                return Response({"uid": uidb64, "token": token}, status=200)
+            else:
+                return Response({"error": "Invalid token"}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+        
+
+#This will be required if password reset operation is managed from only Mobile UI instead of web-url link.
+class PasswordResetCompleteView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        uidb64 = request.data.get("uid")
+        token = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not uidb64 or not token or not new_password:
+            return Response({"error": "uid, token, and new_password are required"}, status=400)
+
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+
+            if default_token_generator.check_token(user, token):
+                user.set_password(new_password)
+                user.save()
+                return Response({"message": "Password reset successfully."}, status=200)
+            else:
+                return Response({"error": "Invalid token"}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+
+def reset_password_form(request, uidb64, token):
+    context = {
+        "uidb64": uidb64,
+        "token": token,
+        "error": None,
+        "success": None,
+    }
+
+    if request.method == "POST":
+        password = request.POST.get("password")
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+            if default_token_generator.check_token(user, token):
+                if "email" not in user.providers:
+                    user.providers.append("email")
+                user.set_password(password)
+                user.save()
+                context["success"] = "Şifren başarıyla güncellendi."
+            else:
+                context["error"] = "Geçersiz veya süresi dolmuş bağlantı."
+        except Exception as e:
+            context["error"] = str(e)
+
+    return render(request, "reset_password_form.html", context)
