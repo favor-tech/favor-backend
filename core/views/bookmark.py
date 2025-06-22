@@ -1,7 +1,6 @@
 from .base_views import GenericAPIView, Response, IsAuthenticated
 from core.models import *
 from django.http import JsonResponse
-import json
 from core.utils.mixins import ApiResponseMixin
 from rest_framework import status
 
@@ -14,14 +13,30 @@ class BookmarkView(GenericAPIView, ApiResponseMixin):
             event_id = request.data.get("event")
             event = Event.objects.get(id=event_id)
 
-            bookmark, created = Bookmark.objects.get_or_create(user=user, event=event)
+            bookmark = Bookmark.objects.filter(user=user, event=event).first()
 
-            serialized = BookmarkSerializer(bookmark)
+            if bookmark:
+                bookmark.delete()
+                return self.api_response(
+                    success=True,
+                    message="Bookmark removed",
+                    data={"is_bookmarked": False},
+                    status_code=status.HTTP_200_OK
+                )
+            else:
+                new_bookmark = Bookmark.objects.create(user=user, event=event)
+                serialized = BookmarkSerializer(new_bookmark, context={"request": request})
+                return self.api_response(
+                    success=True,
+                    message="Bookmark added",
+                    data={**serialized.data, "is_bookmarked": True},
+                    status_code=status.HTTP_201_CREATED
+                )
+        except Event.DoesNotExist:
             return self.api_response(
-                success=True,
-                message="Success",
-                data=serialized.data,
-                status_code=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+                success=False,
+                message="Event not found",
+                status_code=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
             return self.api_response(

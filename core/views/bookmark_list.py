@@ -16,7 +16,7 @@ class BookmarkListView(GenericAPIView, ApiResponseMixin):
 
         event_list = []
         for bookmark in bookmarks:
-            event_data = EventMiniSerializer(bookmark.event).data
+            event_data = EventMiniSerializer(bookmark.event, context={"request": request}).data
             event_list.append({
                 "event": event_data,
                 "bookmarked_at": bookmark.bookmarked_at
