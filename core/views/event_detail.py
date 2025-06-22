@@ -27,7 +27,7 @@ class EventDetailView(GenericAPIView, ApiResponseMixin):
             image_urls = [img.image.url for img in event_images if img.image]
 
             serialized = {
-                'event': EventSerializer(event).data,
+                'event': EventSerializer(event, context={"request": request}).data,
                 'gallery': GallerySerializer(gallery).data,
                 'artists': artists,
                 'images': image_urls,

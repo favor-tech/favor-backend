@@ -60,7 +60,7 @@ class EventsView(GenericAPIView, ApiResponseMixin):
         if self.get_bool_param(request, 'popular'):
             events = events.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
 
-        serialized = EventSerializer(events, many=True).data
+        serialized = EventSerializer(events, many=True, context={"request": request}).data
         return self.api_response(success=True, message="Success", data=serialized, status_code=status.HTTP_200_OK)
 
     def filter_nearby_locations(self, latitude, longitude, delta=0.2):
