@@ -11,4 +11,6 @@ urlpatterns = [
     path('bookmarklist',views.BookmarkListView.as_view()),
     path('galleryprofile',views.GalleryProfileView.as_view()),
     path('accountsettings',views.AccountSettingsView.as_view()),
+    path('artistevents',views.ArtistEventsView.as_view()),
+    path('galleryevents',views.GalleryEventsView.as_view())
 ]

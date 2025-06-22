@@ -8,3 +8,5 @@ from .user_profile import UserProfileView
 from .bookmark_list import BookmarkListView
 from .gallery_profile import GalleryProfileView
 from .account_settings import AccountSettingsView
+from .artist_events import ArtistEventsView
+from .gallery_events import GalleryEventsView
