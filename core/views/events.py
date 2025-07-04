@@ -1,6 +1,6 @@
 from .base_views import GenericAPIView, Response, IsAuthenticated
 from .auth import IsGuestTokenOrAuthenticated
-from core.models import Event, GalleryLocation, EventSerializer
+from core.models import Event, GalleryLocation, EventSerializer , Location
 from core.utils.mixins import ApiResponseMixin
 from rest_framework import status
 from django.db.models import Count, Q
@@ -37,7 +37,36 @@ class EventsView(GenericAPIView, ApiResponseMixin):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
-        nearby_locations = self.filter_nearby_locations(latitude, longitude)
+        use_province_filter = self.get_bool_param(request, 'upcoming') or self.get_bool_param(request, 'popular')
+
+        if use_province_filter:
+            try:
+                matched_location = Location.objects.filter(
+                    latitude__range=(latitude - 0.1, latitude + 0.1),
+                    longitude__range=(longitude - 0.1, longitude + 0.1),
+                ).first()
+
+                if not matched_location or not matched_location.province:
+                    return self.api_response(
+                        success=False,
+                        message="Province could not be determined from coordinates.",
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
+
+                province_name = matched_location.province
+                nearby_locations = GalleryLocation.objects.filter(
+                    province__iexact=province_name
+                )
+
+            except Exception as e:
+                return self.api_response(
+                    success=False,
+                    message="Error determining location: " + str(e),
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            nearby_locations = self.filter_nearby_locations(latitude, longitude)
+
         events = Event.objects.filter(
             gallery_location__in=nearby_locations,
             is_active=True
@@ -92,7 +121,6 @@ class EventsView(GenericAPIView, ApiResponseMixin):
             data=serialized,
             status_code=status.HTTP_200_OK
         )
-
     def filter_nearby_locations(self, latitude, longitude, delta=0.2):
         return GalleryLocation.objects.filter(
             latitude__range=(latitude - delta, latitude + delta),
