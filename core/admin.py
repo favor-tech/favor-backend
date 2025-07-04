@@ -3,8 +3,16 @@ from django.contrib.auth.admin import UserAdmin
 from .models import *
 from django.contrib import admin
 from django import forms
-from datetime import datetime , time
 from .forms import EventForm
+
+admin.site.site_header = "Favor Admin Panel"
+admin.site.site_title = "Favor Administration"
+admin.site.index_title = "Welcome to Favor Admin"
+
+class ArtistModelAdmin(admin.ModelAdmin):
+    search_fields = ["name","surname"]
+    list_display = ["name","surname"]
+
 
 
 class EventArtistInline(admin.TabularInline):
@@ -34,19 +42,8 @@ class EventModelAdmin(admin.ModelAdmin):
     inlines = [EventArtistInline,EventCategoryInline,EventImagesInline]
 
     search_fields = ["title","start_date","end_date"]
-    list_display = ["title","gallery","gallery_location","start_date","end_date"]
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    
-        if db_field.name == "gallery_location":
-            if request._obj_ is not None:
-                kwargs["queryset"] = GalleryLocation.objects.filter(gallery=request._obj_.gallery)
-            else:
-                kwargs["queryset"] = GalleryLocation.objects.none()
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    list_display = ["title","gallery","gallery_location","start_date","end_date","is_indefinite"]
 
-    def get_form(self, request, obj=None, **kwargs):
-        request._obj_ = obj
-        return super().get_form(request, obj, **kwargs)
 
 
 class GalleryImagesInline(admin.TabularInline):
@@ -62,6 +59,8 @@ class GalleryAdmin(admin.ModelAdmin):
     inlines = [GalleryLocationInline,GalleryImagesInline]   
     search_fields = ["name"]
     list_display = ["name"]
+
+
 
 
 class GalleryLocationAdmin(admin.ModelAdmin):
@@ -95,7 +94,7 @@ class CustomUserAdmin(UserAdmin):
         #("Important dates", {"fields": ("last_login",)}),
     )
 
-models = [Role,Permission,RolePermission,GalleryArtist,GalleryUser,Artist,Category,UserLocation,UserRole,UserStatus,
+models = [Role,Permission,RolePermission,GalleryArtist,GalleryUser,Category,UserLocation,UserRole,UserStatus,
           ArtistVerification,ArtistStatus]
 
 
@@ -106,6 +105,7 @@ class BookmarkAdmin(admin.ModelAdmin):
 for model in models:
     admin.site.register(model)
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Artist,ArtistModelAdmin)
 admin.site.register(Event, EventModelAdmin)
 admin.site.register(GalleryLocation,GalleryLocationAdmin)
 admin.site.register(Location,LocationAdmin)
