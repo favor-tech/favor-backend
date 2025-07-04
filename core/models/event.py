@@ -16,8 +16,9 @@ class Event(SoftDeleteModel):
     title = models.CharField(max_length=255,db_index=True)
     gallery = models.ForeignKey("Gallery",on_delete=models.CASCADE,blank=True,null=True)
     gallery_location = models.ForeignKey("GalleryLocation",on_delete=models.SET_NULL,blank=True,null=True,related_name="galleryslocation")
-    start_date = DateTimeField(db_index=True)
-    end_date = DateTimeField(db_index=True)
+    start_date = DateTimeField(db_index=True,null=True,blank=True)
+    end_date = DateTimeField(db_index=True,null=True,blank=True)
+    is_indefinite = models.BooleanField(default=False)
     summary = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     buy_ticket_url = models.URLField(max_length=500,null=True, blank=True)
@@ -48,4 +49,4 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Event
-        fields=["id","title","start_date","end_date","gallery","gallery_name","gallery_location_address","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active","is_bookmarked"]
+        fields=["id","title","start_date","end_date","gallery","gallery_name","gallery_location_address","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active","is_bookmarked","is_indefinite"]

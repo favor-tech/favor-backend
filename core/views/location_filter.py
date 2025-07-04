@@ -3,7 +3,7 @@ from core.models import GalleryLocation
 
 class GalleryLocationAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = GalleryLocation.objects.all()
+        qs = GalleryLocation.objects.all().order_by("id")
 
         gallery_id = self.forwarded.get('gallery', None)
         if gallery_id:
