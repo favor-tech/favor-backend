@@ -64,10 +64,16 @@ class SSOLoginView(APIView):
             email = user_info.get("email")
             if not email:
                 return Response({"error": "Email not found in token"}, status=400)
+            first_name = request.data.get("firstName") or user_info.get("given_name") or user_info.get("name", {}).get("firstName")
+            last_name = request.data.get("lastName") or user_info.get("family_name") or user_info.get("name", {}).get("lastName")
 
-            user, created = User.objects.update_or_create(email=email,defaults={"username": email.split("@")[0]})
+            user, created = User.objects.update_or_create(email=email,defaults={
+                "username":email,  #email.split("@")[0],
+                "name": first_name,
+                "surname": last_name
+            })
             if created:
-                user.username = email.split("@")[0]
+                user.username = email #email.split("@")[0]
                 user.set_unusable_password()
                 user.providers = [provider]
                 user.save()
@@ -82,7 +88,9 @@ class SSOLoginView(APIView):
                 "refresh": str(refresh),
                 "user": {
                     "email": user.email,
-                    "username": user.username
+                    "username": user.username,
+                    "name": user.name,
+                    "surname": user.surname
                 }
             })
         except Exception as e:
