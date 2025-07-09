@@ -66,7 +66,7 @@ class GalleryAdmin(admin.ModelAdmin):
 class GalleryLocationAdmin(admin.ModelAdmin):
     model = GalleryLocation
     search_fields = ["latitude","longitude","address","gallery__name"]
-    list_display = ["get_gallery_name","latitude","longitude","address"]
+    list_display = ["get_gallery_name","latitude","longitude","province","district","address"]
     def get_gallery_name(self, obj):
             return obj.gallery.name if obj.gallery else "-"
     get_gallery_name.short_description = "Gallery"
