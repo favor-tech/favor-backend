@@ -19,7 +19,7 @@ def gallery_cover_photo_upload_path(instance, filename):
 
 class Gallery(SoftDeleteModel):
     name = models.CharField(max_length=255,db_index=True,unique=True)
-    about = models.TextField()
+    about = models.TextField(null=True,blank=True)
     phone = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     is_active = models.BooleanField(default=True)

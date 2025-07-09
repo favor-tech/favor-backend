@@ -18,29 +18,24 @@ class ArtistModelAdmin(admin.ModelAdmin):
 class EventArtistInline(admin.TabularInline):
     model = EventArtist
     extra = 1
-
+    autocomplete_fields = ['artist']
 class EventCategoryInline(admin.TabularInline):
     model = EventCategory
     extra = 1
+    autocomplete_fields = ['category']
+
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+    list_display = ['name']
 
 class EventImagesInline(admin.TabularInline):
     model = EventImages
     extra = 1
 
-class EventModelAdminForm(forms.ModelForm):
-    class Meta:
-        model = Event
-        fields = '__all__'  
-
-        # widgets = {
-        #    'start_date': forms.DateInput(attrs={'type': 'date'}),
-        #    'end_date': forms.DateInput(attrs={'type': 'date'}),
-        # }
-
 class EventModelAdmin(admin.ModelAdmin):
     form = EventForm
     inlines = [EventArtistInline,EventCategoryInline,EventImagesInline]
-
+    autocomplete_fields = ['gallery']
     search_fields = ["title","start_date","end_date"]
     list_display = ["title","gallery","gallery_location","start_date","end_date","is_indefinite"]
 
@@ -59,8 +54,7 @@ class GalleryAdmin(admin.ModelAdmin):
     inlines = [GalleryLocationInline,GalleryImagesInline]   
     search_fields = ["name"]
     list_display = ["name"]
-
-
+    ordering = ['name']
 
 
 class GalleryLocationAdmin(admin.ModelAdmin):
@@ -94,7 +88,7 @@ class CustomUserAdmin(UserAdmin):
         #("Important dates", {"fields": ("last_login",)}),
     )
 
-models = [Role,Permission,RolePermission,GalleryArtist,GalleryUser,Category,UserLocation,UserRole,UserStatus,
+models = [Role,Permission,RolePermission,GalleryArtist,GalleryUser,UserLocation,UserRole,UserStatus,
           ArtistVerification,ArtistStatus]
 
 
@@ -111,3 +105,4 @@ admin.site.register(GalleryLocation,GalleryLocationAdmin)
 admin.site.register(Location,LocationAdmin)
 admin.site.register(Gallery,GalleryAdmin)
 admin.site.register(Bookmark,BookmarkAdmin)
+admin.site.register(Category, CategoryAdmin)
