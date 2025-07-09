@@ -64,8 +64,9 @@ class SSOLoginView(APIView):
             email = user_info.get("email")
             if not email:
                 return Response({"error": "Email not found in token"}, status=400)
-            first_name = request.data.get("firstName") or user_info.get("given_name") or user_info.get("name", {}).get("firstName")
-            last_name = request.data.get("lastName") or user_info.get("family_name") or user_info.get("name", {}).get("lastName")
+            name_info = user_info.get("name", {})
+            first_name = request.data.get("firstName") or user_info.get("given_name") or (name_info.get("firstName") if isinstance(name_info, dict) else name_info.split(" ")[0])
+            last_name = request.data.get("lastName") or user_info.get("family_name") or (name_info.get("lastName") if isinstance(name_info, dict) else " ".join(name_info.split(" ")[1:]))
 
             user, created = User.objects.update_or_create(email=email,defaults={
                 "username":email,  #email.split("@")[0],
