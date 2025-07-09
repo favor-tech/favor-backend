@@ -27,6 +27,7 @@ class EventCategoryInline(admin.TabularInline):
 class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['name']
+    ordering = ['name']
 
 class EventImagesInline(admin.TabularInline):
     model = EventImages
