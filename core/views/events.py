@@ -41,6 +41,10 @@ class EventsView(GenericAPIView, ApiResponseMixin):
 
         if use_province_filter:
             try:
+                ### THESE 2 LINES WILL BE USE INSTEAD OF BELOW LINE , IN THE GLOBAL SCENARIO ###
+                #from core.utils.location_utils import get_or_create_location
+                #matched_location = get_or_create_location(latitude, longitude)
+
                 matched_location = Location.objects.filter(
                     latitude__range=(latitude - 0.1, latitude + 0.1),
                     longitude__range=(longitude - 0.1, longitude + 0.1),
