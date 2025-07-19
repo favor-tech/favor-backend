@@ -1,3 +1,4 @@
+from .health_check import health_check
 from .base_views import IsAuthenticated, GenericAPIView , Response
 from .gallery import GalleryView
 from .events import EventsView
@@ -10,4 +11,4 @@ from .gallery_profile import GalleryProfileView
 from .account_settings import AccountSettingsView
 from .artist_events import ArtistEventsView
 from .gallery_events import GalleryEventsView
-from .health_check import health_check
+from .location_selection import LocationProvinceDistrictView
