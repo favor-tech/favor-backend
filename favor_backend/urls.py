@@ -19,9 +19,10 @@ from django.urls import path, include
 from core.views.auth import SSOLoginView
 from core.views.location_filter import GalleryLocationAutocomplete
 from core.views.auth import *
-
+from core.views.health_check import health_check
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', health_check),
     path('gallerylocation-autocomplete/', GalleryLocationAutocomplete.as_view(), name='gallerylocation-autocomplete'),
     path('', include('core.urls')), 
     

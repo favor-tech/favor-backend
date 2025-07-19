@@ -60,6 +60,9 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -86,6 +89,7 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE = [
+    'favor_backend.middleware.ELBHealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
