@@ -8,6 +8,7 @@ class UserLocation(BaseModel):
     location = models.ForeignKey("Location", on_delete=models.CASCADE)
     detected_at = DateTimeField(editable=False)
     is_active = models.BooleanField()
-
+    selected = models.BooleanField(default=False) 
     class Meta:
         db_table = "user_location"
+        unique_together = ("user", "location", "selected")

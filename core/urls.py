@@ -13,5 +13,9 @@ urlpatterns = [
     path('accountsettings',views.AccountSettingsView.as_view()),
     path('artistevents',views.ArtistEventsView.as_view()),
     path('galleryevents',views.GalleryEventsView.as_view()),
-    path('location/province-district',views.LocationProvinceDistrictView.as_view())
+    path('location/province-district',views.LocationProvinceDistrictView.as_view()),
+    path("user-location/", views.UserLocationCreateView.as_view(), name="user-location-create"),
+    path("user-location/history/", views.UserLocationListView.as_view(), name="user-location-history"),
+
+
 ]
