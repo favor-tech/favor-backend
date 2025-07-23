@@ -2,6 +2,7 @@ from .base_views import GenericAPIView, Response, IsAuthenticated
 from .auth import IsGuestTokenOrAuthenticated
 from core.models import Event, GalleryLocation, EventSerializer , Location
 from core.utils.mixins import ApiResponseMixin
+from core.utils.location_utils import haversine 
 from rest_framework import status
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -37,7 +38,7 @@ class EventsView(GenericAPIView, ApiResponseMixin):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
-        use_province_filter = self.get_bool_param(request, 'upcoming') or self.get_bool_param(request, 'popular')
+        use_province_filter = True #self.get_bool_param(request, 'upcoming') or self.get_bool_param(request, 'popular')
 
         if use_province_filter:
             try:
@@ -106,9 +107,19 @@ class EventsView(GenericAPIView, ApiResponseMixin):
                 Q(is_indefinite=True) |
                 Q(start_date__gt=now, is_indefinite=False)
             )
-
         if self.get_bool_param(request, 'popular'):
             events = events.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
+        else:
+            event_distance_pairs = []
+            for event in events:
+                location = event.gallery_location
+                if location:
+                    distance = haversine(latitude, longitude, location.latitude, location.longitude)
+                    event_distance_pairs.append((distance, event))
+
+            event_distance_pairs.sort(key=lambda x: x[0])
+            events = [pair[1] for pair in event_distance_pairs]
+
 
         serialized = EventSerializer(events, many=True, context={"request": request}).data
         return self.api_response(
