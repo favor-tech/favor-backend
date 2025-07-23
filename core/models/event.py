@@ -39,6 +39,8 @@ class EventSerializer(serializers.ModelSerializer):
     thumbnail_image = serializers.ImageField(use_url=True, allow_null=True)
     gallery_name = serializers.CharField(source="gallery.name", read_only=True)
     gallery_location_address = serializers.CharField(source="gallery_location.address", read_only=True)
+    gallery_location_latitude = serializers.CharField(source="gallery_location.latitude", read_only=True)
+    gallery_location_longitude = serializers.CharField(source="gallery_location.longitude", read_only=True)
     is_bookmarked = serializers.SerializerMethodField()
     def get_is_bookmarked(self, obj):
         request = self.context.get("request")
@@ -49,4 +51,4 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=Event
-        fields=["id","title","start_date","end_date","gallery","gallery_name","gallery_location_address","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active","is_bookmarked","is_indefinite"]
+        fields=["id","title","start_date","end_date","gallery","gallery_name","gallery_location_address","gallery_location_latitude","gallery_location_longitude","web_url","description","thumbnail_image","buy_ticket_url","is_free","price","is_active","is_bookmarked","is_indefinite"]
