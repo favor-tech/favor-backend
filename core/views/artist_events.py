@@ -21,9 +21,20 @@ class ArtistEventsView(GenericAPIView, ApiResponseMixin):
 
             event_ids = EventArtist.objects.filter(artist=artist).values_list("event_id", flat=True)
 
-            events = Event.objects.filter(id__in=event_ids, start_date__lte=now()).order_by("-start_date")
+            dated_events = Event.objects.filter(
+                id__in=event_ids,
+                start_date__lte=now(),
+                is_indefinite=False
+            )
 
-            serialized = EventSerializer(events, many=True, context={"request": request})
+            indefinite_events = Event.objects.filter(
+                id__in=event_ids,
+                is_indefinite=True
+            )
+
+            all_events = dated_events.union(indefinite_events).order_by("-start_date")
+
+            serialized = EventSerializer(all_events, many=True, context={"request": request})
 
             return self.api_response(success=True, message="Success", data=serialized.data, status_code=status.HTTP_200_OK)
 
