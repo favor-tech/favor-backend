@@ -4,6 +4,8 @@ from .models import *
 from django.contrib import admin
 from django import forms
 from .forms import EventForm
+from core.services.firebase_service import send_push_to_user
+from django.contrib import messages
 
 admin.site.site_header = "Favor Admin Panel"
 admin.site.site_title = "Favor Administration"
@@ -97,6 +99,42 @@ class BookmarkAdmin(admin.ModelAdmin):
     search_fields = ["bookmarked_at"]
     list_display = ["user","event","bookmarked_at"]
 
+class GeneralNotificationAdmin(admin.ModelAdmin):
+    list_display = ("title", "message", "created_at")
+    actions = ["send_push_to_all"]
+
+    def send_push_to_all(self, request, queryset):
+        for notification in queryset:
+            users = User.objects.all()
+            for user in users:
+                send_push_to_user(
+                    user,
+                    notification.title,
+                    notification.message,
+                    redirect_url=None
+                )
+        self.message_user(request, f"{queryset.count()} bildirim gönderildi.", messages.SUCCESS)
+
+    send_push_to_all.short_description = "Seçili bildirimleri tüm kullanıcılara gönder"
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("user", "title", "message", "is_read", "sent_at")
+    actions = ["send_push_to_user"]
+
+    def send_push_to_user(self, request, queryset):
+        for notification in queryset:
+            send_push_to_user(
+                notification.user,
+                notification.title,
+                notification.message,
+                notification.redirect_url
+            )
+        self.message_user(request, f"{queryset.count()} bildirim kullanıcıya gönderildi.", messages.SUCCESS)
+
+    send_push_to_user.short_description = "Seçili bildirimleri ilgili kullanıcıya gönder"
+
+
+
 for model in models:
     admin.site.register(model)
 admin.site.register(User, CustomUserAdmin)
@@ -107,3 +145,5 @@ admin.site.register(Location,LocationAdmin)
 admin.site.register(Gallery,GalleryAdmin)
 admin.site.register(Bookmark,BookmarkAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(GeneralNotification, GeneralNotificationAdmin)
+admin.site.register(Notification, NotificationAdmin)
