@@ -11,5 +11,5 @@ from .gallery_profile import GalleryProfileView
 from .account_settings import AccountSettingsView
 from .artist_events import ArtistEventsView
 from .gallery_events import GalleryEventsView
-from .location_selection import LocationProvinceDistrictView
+from .location import LocationProvinceDistrictView
 from .user_location import UserLocationCreateView, UserLocationListView
