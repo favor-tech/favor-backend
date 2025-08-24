@@ -108,7 +108,13 @@ class EventsView(GenericAPIView, ApiResponseMixin):
                 Q(start_date__gt=now, is_indefinite=False)
             )
         if self.get_bool_param(request, 'popular'):
-            events = events.annotate(bookmark_count=Count('bookmark')).order_by('-bookmark_count')
+            now = timezone.now()
+            events = events.filter(
+                Q(is_indefinite=True) |
+                Q(start_date__lte=now, is_indefinite=False)
+            ).annotate(
+                bookmark_count=Count('bookmark')
+            ).order_by('-bookmark_count')
         else:
             event_distance_pairs = []
             for event in events:
